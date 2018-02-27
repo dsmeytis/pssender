@@ -53,7 +53,6 @@ my_json procps_parse() {
 		if (!fs.is_open())
 			perror("error while opening file");
 		fs >> cmd;
-		cout << cmd << endl;
 		kernel = cmd.empty();
 		fs.close();
 
