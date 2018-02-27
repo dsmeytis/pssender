@@ -53,6 +53,7 @@ my_json procps_parse() {
 		if (!fs.is_open())
 			perror("error while opening file");
 		fs >> cmd;
+		cout << cmd << endl;
 		kernel = cmd.empty();
 		fs.close();
 
@@ -71,14 +72,25 @@ my_json procps_parse() {
 		}
 		fs.close();
 
+		/* convert \0 to whitespace */
+		size_t found = cmd.find_first_of('\0');
+		while (found != string::npos) {
+			if (found == cmd.size() - 1) {
+				cmd.pop_back();
+				break;
+			}
+			cmd.replace(found, 1, 1, ' ');
+			found = cmd.find_first_of('\0', found + 1);
+		}
+
 		/* find and screen special JSON symbols in cmd */
-		size_t found = cmd.find_first_of("\"\\");
+		found = cmd.find_first_of("\"\\");
 		while (found != string::npos) {
 			cmd.insert(found, 1, '\\');
 			found = cmd.find_first_of("\"\\", found + 1);
 		}
 
-		j += {{"uid", uid}, {"pid", pid}, {"cmd", cmd.data()}};
+		j += {{"uid", uid}, {"pid", pid}, {"cmd", cmd}};
 	}
 	closedir(proc);
 	return j;
